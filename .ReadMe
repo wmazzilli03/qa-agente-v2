@@ -1,0 +1,92 @@
+# QA Agente V2
+
+Proyecto para aprender sobre agentes de IA y automatización de pruebas de calidad.
+
+## Descripción
+
+Este proyecto implementa un servidor MCP (Model Context Protocol) que proporciona herramientas para gestionar reportes de pruebas automatizadas. El servidor está construido con TypeScript y utiliza el SDK de MCP para crear herramientas que pueden ser consumidas por clientes de IA.
+
+## Estructura del Proyecto
+
+```
+qa-agente-v2/
+├── .ReadMe                 # Este archivo de documentación
+├── .env                    # Variables de entorno
+├── .gitignore             # Archivos ignorados por Git
+├── package.json           # Dependencias y scripts del proyecto
+├── tsconfig.json          # Configuración de TypeScript
+├── mcp-server/            # Servidor MCP principal
+│   └── index.ts          # Código del servidor con herramientas registradas
+├── agente-01-reader/      # Directorio para el primer agente (pendiente)
+├── results/               # Carpeta para almacenar reportes de pruebas
+└── node_modules/          # Dependencias instaladas
+```
+
+## Funcionalidades Implementadas
+
+### Servidor MCP
+
+El servidor (`mcp-server/index.ts`) proporciona tres herramientas principales:
+
+#### 1. `listar_reportes`
+- **Descripción**: Lista todos los reportes guardados en la carpeta `results`
+- **Parámetros**: No requiere parámetros
+- **Uso**: Ideal para obtener un overview de todos los reportes disponibles
+
+#### 2. `leer_resultado_del_test`
+- **Descripción**: Lee el contenido de un archivo JSON de resultados de pruebas
+- **Parámetros**: 
+  - `fileName` (string): Nombre del archivo JSON a leer
+- **Uso**: Permite examinar el contenido detallado de un reporte específico
+
+#### 3. `guardar_reporte`
+- **Descripción**: Guarda un reporte en la carpeta `results`
+- **Parámetros**:
+  - `fileName` (string): Nombre del archivo JSON a guardar
+  - `content` (string): Contenido del reporte a guardar
+- **Uso**: Almacena nuevos resultados de pruebas para análisis posterior
+
+## Configuración
+
+El proyecto utiliza variables de entorno definidas en el archivo `.env` para configuración sensible.
+agrega tu ANTHROPIC_API_KEY
+
+## Instalación y Ejecución
+
+### Prerrequisitos
+- Node.js instalado
+- npm o yarn
+
+### Instalación de Dependencias
+```bash
+npm install
+```
+
+### Ejecución del Servidor
+```bash
+npm run server
+```
+
+## Dependencias Principales
+
+- `@modelcontextprotocol/sdk`: SDK para implementar servidores MCP
+- `@anthropic-ai/sdk`: SDK de Anthropic para integración con modelos de IA
+- `dotenv`: Manejo de variables de entorno
+- `zod`: Validación de esquemas de datos
+- `typescript`: Compilador de TypeScript
+- `ts-node`: Ejecución directa de archivos TypeScript
+
+## Próximos Pasos
+
+1. **Implementar agente-01-reader**: Desarrollar el primer agente que utilizará las herramientas MCP
+2. **Integración con Cypress**: Conectar con resultados de pruebas automatizadas
+3. **Análisis de resultados**: Implementar lógica para analizar y procesar reportes
+4. **Interfaz de usuario**: Crear una interfaz para visualizar los resultados
+
+## Configuración
+
+El proyecto utiliza variables de entorno definidas en el archivo `.env` para configuración sensible.
+
+## Contribución
+
+Este es un proyecto educativo para aprender sobre agentes de IA y automatización de pruebas de calidad.
