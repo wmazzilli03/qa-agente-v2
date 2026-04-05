@@ -66,17 +66,37 @@ export function registrarStepsTools(server: McpServer) {
     async ({ nombreArchivo }) => {
       const rutaCompleta = path.join(CYPRESS_BASE, "pageObjectModel", nombreArchivo);
 
+      // Si no existe → crear estructura vacía
       if (!fs.existsSync(rutaCompleta)) {
+        
+        // Crear la carpeta si no existe
+        const carpeta = path.dirname(rutaCompleta);
+        if (!fs.existsSync(carpeta)) {
+          fs.mkdirSync(carpeta, { recursive: true });
+        }
+
+        // Detectar si es Elementos o Funciones por el nombre
+        const esElementos = nombreArchivo.includes("Elementos");
+        const nombreClase = path.basename(nombreArchivo, ".js");
+        const nombreBase  = nombreClase.replace("Elementos", "").replace("Funciones", "");
+
+        // Crear contenido vacío con la estructura correcta
+        const contenidoVacio = esElementos
+          ? `const ${nombreClase} = {\n  // selectores XPath aquí\n};\n\nexport default ${nombreClase};\n`
+          : `import ${nombreBase}Elementos from "./${nombreBase}Elementos";\n\nclass ${nombreClase} {\n  constructor() {\n    this.selectors = ${nombreBase}Elementos;\n  }\n}\n\nexport default ${nombreClase};\n`;
+
+        fs.writeFileSync(rutaCompleta, contenidoVacio, "utf-8");
+
         return {
           content: [{
             type: "text",
-            text: `❌ No se encontró el Page Object en: ${rutaCompleta}`,
+            text: `⚠️ Page Object no existía — creado con estructura vacía: ${nombreArchivo}\n\n${contenidoVacio}`,
           }],
         };
       }
 
+      // Si existe → leerlo normalmente
       const contenido = fs.readFileSync(rutaCompleta, "utf-8");
-
       return {
         content: [{
           type: "text",

@@ -1,0 +1,36 @@
+Feature: Gestión del Carrito de Compras
+
+  @agregar_producto_carrito
+  Scenario: Agregar un producto al carrito
+    Given el usuario está autenticado con usuario "standard_user" y contraseña "secret_sauce"
+    And el usuario se encuentra en la página de productos
+    When el usuario hace clic en "Add to cart" del primer producto
+    Then el ícono del carrito muestra "1" producto
+
+  @agregar_multiples_productos
+  Scenario: Agregar múltiples productos al carrito
+    Given el usuario está autenticado con usuario "standard_user" y contraseña "secret_sauce"
+    And el usuario se encuentra en la página de productos
+    When el usuario agrega "2" productos distintos al carrito
+    Then el ícono del carrito muestra "2" productos
+
+  @quitar_producto_carrito
+  Scenario: Quitar un producto del carrito
+    Given el usuario está autenticado con usuario "standard_user" y contraseña "secret_sauce"
+    And el usuario tiene "1" producto en el carrito
+    When el usuario hace clic en "Remove" del producto
+    Then el ícono del carrito desaparece
+
+  @ver_detalle_carrito
+  Scenario: Ver detalle del carrito con productos
+    Given el usuario está autenticado con usuario "standard_user" y contraseña "secret_sauce"
+    And el usuario tiene productos en el carrito
+    When el usuario hace clic en el ícono del carrito
+    Then el usuario ve la lista de productos agregados en el carrito
+
+  @carrito_vacio
+  Scenario: Visualizar carrito vacío
+    Given el usuario está autenticado con usuario "standard_user" y contraseña "secret_sauce"
+    And el usuario no ha agregado productos al carrito
+    When el usuario hace clic en el ícono del carrito
+    Then el usuario ve un carrito sin productos

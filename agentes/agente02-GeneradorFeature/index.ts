@@ -26,8 +26,8 @@ const argumento3   = process.argv[5]; // nombre del .feature (solo en modo confi
 // Validamos que se pasó el modo correcto
 if (!modo || !["borrador", "confirmar"].includes(modo)) {
   console.error("❌ Uso correcto:");
-  console.error("   npm run agente02:borrador  historia_usuario.txt");
-  console.error("   npm run agente02:confirmar login-borrador.txt Sprint1 login.feature");
+  console.error(`   npm run agente02:borrador  ${argumento1}`);
+  console.error(`   npm run agente02:confirmar ${argumento1} sprintxxx nombre_feature`);
   process.exit(1);
 }
 
@@ -190,7 +190,7 @@ Luego guarda el resultado como borrador con el nombre "${nombreBorrador}".`
 
         console.log(`\n✅ Borrador guardado como: results/${nombreBorrador}`);
         console.log(`👀 Revísalo y si está bien ejecuta:`);
-        console.log(`   npm run agente02:confirmar ${nombreBorrador} Sprint1 login.feature`);
+        console.log(`   npm run agente02:confirmar ${nombreBorrador} numero_sprint nombre_feature`);
       }
     }
   }
@@ -201,7 +201,7 @@ Luego guarda el resultado como borrador con el nombre "${nombreBorrador}".`
     // Validamos que se pasaron todos los argumentos necesarios
     if (!argumento2 || !argumento3) {
       console.error("❌ Para confirmar necesitas: npm run agente02:confirmar [borrador] [Sprint] [feature]");
-      console.error("   Ejemplo: npm run agente02:confirmar login-borrador.txt Sprint1 login.feature");
+      console.error(`   Ejemplo: npm run agente02:confirmar ${argumento1} ${argumento2} ${argumento3}`);
       process.exit(1);
     }
 

@@ -1,0 +1,37 @@
+HISTORIA DE USUARIO — Sprint 3
+Funcionalidad: Gestión del Carrito de Compras
+Aplicación: SauceDemo (https://www.saucedemo.com)
+Credenciales: usuario: standard_user / password: secret_sauce
+
+─────────────────────────────────────────────────
+COMO usuario autenticado en SauceDemo
+QUIERO poder agregar y quitar productos del carrito
+PARA gestionar mis compras antes de finalizar el pedido
+─────────────────────────────────────────────────
+
+CRITERIOS DE ACEPTACIÓN:
+
+1. AGREGAR PRODUCTO AL CARRITO
+   - Dado que el usuario está en la página de productos
+   - Cuando hace clic en "Add to cart" de un producto
+   - Entonces el ícono del carrito muestra 1 producto
+
+2. AGREGAR MÚLTIPLES PRODUCTOS
+   - Dado que el usuario está en la página de productos
+   - Cuando agrega 2 productos distintos al carrito
+   - Entonces el ícono del carrito muestra 2 productos
+
+3. QUITAR PRODUCTO DEL CARRITO
+   - Dado que el usuario tiene 1 producto en el carrito
+   - Cuando hace clic en "Remove" del producto
+   - Entonces el ícono del carrito desaparece
+
+4. VER DETALLE DEL CARRITO
+   - Dado que el usuario tiene productos en el carrito
+   - Cuando hace clic en el ícono del carrito
+   - Entonces ve la lista de productos agregados
+
+5. CARRITO VACÍO
+   - Dado que el usuario no ha agregado productos
+   - Cuando hace clic en el ícono del carrito
+   - Entonces ve un carrito sin productos

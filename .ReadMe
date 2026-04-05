@@ -90,3 +90,8 @@ El proyecto utiliza variables de entorno definidas en el archivo `.env` para con
 ## Contribución
 
 Este es un proyecto educativo para aprender sobre agentes de IA y automatización de pruebas de calidad.
+
+### Ejecutar agente 3 ejemplo:
+```bash
+npm run agente03 -- Sprint1/login.feature Login Sprint1/login.ts
+```

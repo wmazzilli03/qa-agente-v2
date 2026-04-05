@@ -6,35 +6,70 @@ import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js"
 import path from "path";
 import "dotenv/config"; // ← agrega esta línea
 
-// ─────────────────────────────────────────────
-// CONFIGURACIÓN
-// ─────────────────────────────────────────────
-const FEATURE_PATH    = "Sprint1/login.feature";
-const PAGE_OBJ_ELEM   = "Login/LoginElementos.js";
-const PAGE_OBJ_FUNC   = "Login/LoginFunciones.js";
-const STEPS_OUTPUT    = "Sprint1/login.ts";
+
 
 // ─────────────────────────────────────────────
-// PROMPT DEL SISTEMA — controla la calidad del output
+// CONFIGURACIÓN — recibe parámetros desde terminal
 // ─────────────────────────────────────────────
+
+// process.argv[2] = primer argumento que pasas
+// process.argv[3] = segundo argumento
+// process.argv[4] = tercer argumento
+
+const args = process.argv.slice(2); // slice(2) quita "node" y "index.ts"
+
+if (args.length < 3) {
+  console.error("❌ Uso: npm run agente03 -- <feature> <carpetaPO> <outputSteps>");
+  console.error("   Ejemplo: npm run agente03 -- Sprint1/login.feature Login Sprint1/login.ts");
+  process.exit(1); // detiene el proceso con error
+}
+
+const FEATURE_PATH  = args[0]; // "Sprint1/login.feature"
+const CARPETA_PO    = args[1]; // "Login" o "Productos"
+const STEPS_OUTPUT  = args[2]; // "Sprint1/login.ts"
+
+// Con la carpeta construimos los nombres de Page Objects automáticamente
+// Si carpeta = "Login"     → LoginElementos.js y LoginFunciones.js
+// Si carpeta = "Productos" → ProductosElementos.js y ProductosFunciones.js
+const PAGE_OBJ_ELEM = `${CARPETA_PO}/${CARPETA_PO}Elementos.js`;
+const PAGE_OBJ_FUNC = `${CARPETA_PO}/${CARPETA_PO}Funciones.js`;
+
+console.log(`📂 Feature:     ${FEATURE_PATH}`);
+console.log(`📂 Page Object: ${PAGE_OBJ_ELEM}`);
+console.log(`📂 Page Object: ${PAGE_OBJ_FUNC}`);
+console.log(`📂 Output:      ${STEPS_OUTPUT}\n`);
+
 const SYSTEM_PROMPT = `Eres un experto generador de Cypress step definitions.
 
 FLUJO OBLIGATORIO — sigue este orden siempre:
 1. Lee el .feature
-2. Lee LoginElementos.js
-3. Lee LoginFunciones.js
-4. Analiza qué métodos faltan en LoginFunciones.js para cubrir TODOS los steps
+2. Lee el archivo Elementos.js del Page Object indicado
+3. Lee el archivo Funciones.js del Page Object indicado
+4. Analiza qué métodos faltan en Funciones.js para cubrir TODOS los steps
 5. Llama actualizar_page_object_funciones con los métodos que faltan
-6. Lee LoginFunciones.js de nuevo para confirmar los métodos actualizados
+6. Lee Funciones.js de nuevo para confirmar los métodos actualizados
 7. Genera el step definitions usando SOLO métodos del Page Object
 8. Guarda el step con guardar_steps
 
-REGLAS PARA LoginElementos.js:
-- Los XPath usan comillas simples afuera y comillas DOBLES adentro
-- Correcto: '//input[@id="user-name"]'
-- Incorrecto: '//input[@id='user-name']'
+CUANDO LOS PAGE OBJECTS NO EXISTEN:
+- Si leer_page_object devuelve "creado con estructura vacía" → continúa el flujo normal
+- Usa actualizar_page_object_elementos para agregar los XPath necesarios
+- Usa actualizar_page_object_funciones para agregar los métodos necesarios
+- NUNCA te detengas a preguntar — siempre continúa creando lo que falta
 
-REGLAS PARA LoginFunciones.js:
+REGLAS PARA archivos Elementos.js:
+- CRÍTICO: Los XPath SIEMPRE usan comillas simples afuera y comillas DOBLES adentro
+- ✅ CORRECTO:   btnLogin: '//button[@id="login-button"]'
+- ✅ CORRECTO:   inputUser: '//input[@id="user-name"]'
+- ✅ CORRECTO contains: '//button[contains(text(), "Add to cart")]'
+- ✅ CORRECTO contains class: '//a[contains(@class, "shopping_cart")]'
+- ✅ CORRECTO text exacto: '//span[text()="Continue Shopping"]'
+- ✅ CORRECTO con índice: '(//button[contains(text(), "Add to cart")])[1]'
+- ❌ INCORRECTO: '//button[contains(text(), 'Add to cart')]'
+- ❌ INCORRECTO: '//span[@class='shopping_cart_badge']'
+- REGLA DE ORO: todo lo que va entre comillas DENTRO del XPath → siempre comillas DOBLES
+
+REGLAS PARA archivos Funciones.js:
 - Es un archivo .js NO .ts — PROHIBIDO usar tipos TypeScript
 - Incorrecto: ingresarCredenciales(usuario: string, password: string)
 - Correcto:   ingresarCredenciales(usuario, password)
@@ -43,12 +78,15 @@ REGLAS PARA LoginFunciones.js:
 REGLAS ESTRICTAS DEL STEP GENERADO:
 - Import: import { Given, When, Then } from "@badeball/cypress-cucumber-preprocessor"
 - NUNCA importes And — no existe. Usa Given, When o Then según contexto
-- Import Page Object: import LoginFunciones from "../../pageObjectModel/Login/LoginFunciones"
-- Instancia: const loginFunciones = new LoginFunciones()
+- Import Page Object SIEMPRE así:
+  import [NombreClase]Funciones from "../../pageObjectModel/[Carpeta]/[NombreClase]Funciones"
+- Ejemplo: import CarritoFunciones from "../../pageObjectModel/Carrito/CarritoFunciones"
+- La carpeta del import es exactamente la misma carpeta que se pasó como parámetro al agente
+- NUNCA uses rutas como support/, commands/, o cualquier otra ruta inventada
 - PROHIBIDO TOTALMENTE usar cy. directamente en el step
 - PROHIBIDO: cy.xpath(), cy.url(), cy.visit(), cy.clearCookies(), cy.clearLocalStorage()
-- Si necesitas cy. → primero crea el método en LoginFunciones.js
-- Todo cy. va dentro de LoginFunciones.js, nunca en el step
+- Si necesitas cy. → primero crea el método en Funciones.js
+- Todo cy. va dentro de Funciones.js, nunca en el step
 - Los parámetros {string} del Gherkin se reciben como (param: string) en TypeScript
 - Genera TODOS los steps sin omitir ninguno
 - Solo código TypeScript puro sin markdown ni comentarios`;
