@@ -1,0 +1,159 @@
+Título: Inicio de sesión de usuario
+
+Historia:
+Como usuario registrado
+Quiero iniciar sesión con mi usuario y contraseña
+Para acceder al catálogo de productos y poder realizar compras
+
+🎯 Objetivo de negocio
+
+Permitir el acceso seguro de usuarios a la plataforma para habilitar el flujo de compra.
+
+👤 Actor
+
+Usuario registrado
+
+📌 Descripción funcional
+
+El sistema debe permitir a un usuario autenticarse mediante un formulario de login con los campos:
+
+Usuario
+Contraseña
+
+Al autenticarse correctamente, el usuario será redirigido al inventario de productos.
+En caso de error, se debe mostrar un mensaje claro sin permitir el acceso.
+
+📏 Reglas de negocio
+Ambos campos son obligatorios
+Las credenciales deben coincidir con usuarios válidos
+Usuarios bloqueados no pueden acceder
+El sistema debe mostrar mensajes de error claros
+No se permite acceso directo a páginas internas sin autenticación
+✅ Criterios de aceptación
+Login exitoso redirige al inventario
+Login fallido muestra mensaje de error
+Validación de campos obligatorios
+Usuario bloqueado no puede ingresar
+Acceso directo sin login está restringido
+🧪 Casos de Prueba (Formato funcional)
+🟢 CP01 – Login exitoso
+
+Precondición: Usuario registrado válido
+
+Pasos:
+
+Ingresar a la página de login
+Ingresar usuario válido
+Ingresar contraseña correcta
+Hacer clic en "Login"
+
+Resultado esperado:
+
+Acceso exitoso
+Redirección al inventario de productos
+🔴 CP02 – Contraseña incorrecta
+
+Precondición: Usuario registrado
+
+Pasos:
+
+Ingresar usuario válido
+Ingresar contraseña incorrecta
+Hacer clic en "Login"
+
+Resultado esperado:
+
+Mensaje de error visible
+No se permite acceso
+🔴 CP03 – Usuario inexistente
+
+Precondición: Ninguna
+
+Pasos:
+
+Ingresar usuario inválido
+Ingresar cualquier contraseña
+Hacer clic en "Login"
+
+Resultado esperado:
+
+Mensaje de error
+No se permite acceso
+🔴 CP04 – Usuario bloqueado
+
+Precondición: Usuario bloqueado
+
+Pasos:
+
+Ingresar usuario bloqueado
+Ingresar contraseña correcta
+Hacer clic en "Login"
+
+Resultado esperado:
+
+Mensaje indicando usuario bloqueado
+Acceso denegado
+⚠️ CP05 – Campos vacíos
+
+Precondición: Ninguna
+
+Pasos:
+
+No ingresar datos
+Hacer clic en "Login"
+
+Resultado esperado:
+
+Mensaje de validación
+No se permite avanzar
+⚠️ CP06 – Solo usuario ingresado
+
+Precondición: Ninguna
+
+Pasos:
+
+Ingresar usuario
+Dejar contraseña vacía
+Hacer clic en "Login"
+
+Resultado esperado:
+
+Mensaje de error
+No se permite acceso
+🔒 CP07 – Acceso sin autenticación
+
+Precondición: Usuario no autenticado
+
+Pasos:
+
+Intentar acceder directamente a la URL de inventario
+
+Resultado esperado:
+
+Redirección a login
+⏱️ CP08 – Tiempo de respuesta
+
+Precondición: Usuario válido
+
+Pasos:
+
+Ingresar credenciales válidas
+Hacer login
+
+Resultado esperado:
+
+Respuesta menor a 2 segundos
+Acceso correcto
+🔄 CP09 – Flujo repetido de login
+
+Precondición: Usuario válido
+
+Pasos:
+
+Realizar login
+Cerrar sesión
+Volver a hacer login
+
+Resultado esperado:
+
+El sistema permite el acceso correctamente en ambos intentos

@@ -6,6 +6,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { registrarCypressTools }   from "./tools/cypress.tools.js";
 import { registrarReportesTools }  from "./tools/reportes.tools.js";
 import { registrarGeneradorTools } from "./tools/generador.tools.js";
+import { registrarStepsTools } from "./tools/steps.tools.js";
 
 // Creamos el servidor MCP con nombre y versión
 const server = new McpServer({
@@ -17,7 +18,7 @@ const server = new McpServer({
 registrarCypressTools(server);   // ejecutar_cypress, leer_resultado_del_test
 registrarReportesTools(server);  // listar_reportes, guardar_reporte
 registrarGeneradorTools(server); // leer_historia_usuario, guardar_borrador_gherkin, guardar_feature_en_cypress
-
+registrarStepsTools(server);     // leer_feature, guardar_steps
 
 // Función principal que arranca el servidor
 async function main() {

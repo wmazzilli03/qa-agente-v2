@@ -1,0 +1,68 @@
+Feature: Inicio de sesión de usuario
+
+  @login_exitoso
+  Scenario: Login exitoso con credenciales válidas
+    Given El usuario se encuentra en la página de login
+    When El usuario ingresa usuario "standard_user"
+    And El usuario ingresa contraseña "secret_sauce"
+    And El usuario hace clic en "Login"
+    Then El usuario debe ser redirigido al inventario de productos
+    And El inventario debe mostrar los productos disponibles
+
+  @login_contraseña_incorrecta
+  Scenario: Login fallido con contraseña incorrecta
+    Given El usuario se encuentra en la página de login
+    When El usuario ingresa usuario "standard_user"
+    And El usuario ingresa contraseña "password_incorrecta"
+    And El usuario hace clic en "Login"
+    Then Se debe mostrar un mensaje de error
+
+  @login_usuario_inexistente
+  Scenario: Login fallido con usuario inexistente
+    Given El usuario se encuentra en la página de login
+    When El usuario ingresa usuario "usuario_inexistente"
+    And El usuario ingresa contraseña "secret_sauce"
+    And El usuario hace clic en "Login"
+    Then Se debe mostrar un mensaje de error
+
+  @login_usuario_bloqueado
+  Scenario: Login fallido con usuario bloqueado
+    Given El usuario se encuentra en la página de login
+    When El usuario ingresa usuario "locked_out_user"
+    And El usuario ingresa contraseña "secret_sauce"
+    And El usuario hace clic en "Login"
+    Then Se debe mostrar mensaje indicando que el usuario está bloqueado
+
+  @login_campos_vacios
+  Scenario: Login fallido con campos vacíos
+    Given El usuario se encuentra en la página de login
+    When El usuario hace clic en "Login"
+    Then Se debe mostrar un mensaje de validación
+
+  @login_solo_usuario
+  Scenario: Login fallido con solo usuario ingresado
+    Given El usuario se encuentra en la página de login
+    When El usuario ingresa usuario "standard_user"
+    And El usuario hace clic en "Login"
+    Then Se debe mostrar un mensaje de error
+
+  @login_solo_contraseña
+  Scenario: Login fallido con solo contraseña ingresada
+    Given El usuario se encuentra en la página de login
+    When El usuario ingresa contraseña "secret_sauce"
+    And El usuario hace clic en "Login"
+    Then Se debe mostrar un mensaje de error
+
+  @acceso_sin_autenticacion
+  Scenario: Acceso denegado sin autenticación
+    Given El usuario no está autenticado
+    When El usuario intenta acceder directamente a la página de inventario
+    Then El usuario debe ser redirigido a la página de login
+
+  @flujo_repetido_login
+  Scenario: Flujo repetido de login y logout
+    Given El usuario se encuentra en la página de login
+    When El usuario ingresa usuario "standard_user"
+    And El usuario ingresa contraseña "secret_sauce"
+    And El usuario hace clic en "Login"
+    Then El usuario debe ser redirigido al inventario de productos

@@ -6,7 +6,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "server": "tsx mcp-server/index.ts",
-    "agente01": "tsx agente01-LeeAnaliza/index.ts"
+    "agente01": "tsx agentes/agente01-LeeAnaliza/index.ts",
+    "agente02:borrador": "tsx agentes/agente02-GeneradorFeature/index.ts borrador",
+    "agente02:confirmar": "tsx agentes/agente02-GeneradorFeature/index.ts confirmar",
+    "agente03": "tsx agentes/agente03-GeneradorSteps/index.ts"
   },
   "keywords": [],
   "author": "",
