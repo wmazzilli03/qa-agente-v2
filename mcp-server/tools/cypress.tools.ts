@@ -1,13 +1,10 @@
-// Importamos el tipo McpServer para tipar el parámetro
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import fs from "fs";
 import path from "path";
 
-// Esta función recibe el servidor y registra las tools de Cypress
 export function registrarCypressTools(server: McpServer) {
 
-  // Tool: Lee el contenido de un archivo JSON de resultados
   server.registerTool(
     "leer_resultado_del_test",
     {
@@ -19,13 +16,11 @@ export function registrarCypressTools(server: McpServer) {
     },
     async ({ fileName }) => {
       const filePath = path.join(process.cwd(), "results", fileName);
-
       if (!fs.existsSync(filePath)) {
         return {
           content: [{ type: "text", text: `Error: El archivo ${fileName} no existe` }]
         };
       }
-
       const contenido = fs.readFileSync(filePath, "utf-8");
       return {
         content: [{ type: "text", text: contenido }]
@@ -33,7 +28,6 @@ export function registrarCypressTools(server: McpServer) {
     }
   );
 
-  // Tool: Ejecuta Cypress y convierte el resultado al formato del agente
   server.registerTool(
     "ejecutar_cypress",
     {
@@ -46,8 +40,22 @@ export function registrarCypressTools(server: McpServer) {
     async ({ spec }) => {
 
       const { execSync } = await import("child_process");
+      const CARPETA_RESULTS = "D:/QA/Front/cypress_front/cypress/results";
+      const DESTINO = path.join(process.cwd(), "results", "test-resultado.json");
 
-      // ── PASO 1: Correr Cypress ──────────────────────────────────────
+      // ── PASO 1: Borrar reportes anteriores ─────────────────────────
+      // Así garantizamos que siempre leemos el reporte de ESTA ejecución
+      if (fs.existsSync(CARPETA_RESULTS)) {
+        const reportesViejos = fs.readdirSync(CARPETA_RESULTS)
+          .filter(f => f.startsWith("mochawesome") && f.endsWith(".json"));
+
+        for (const reporte of reportesViejos) {
+          fs.unlinkSync(path.join(CARPETA_RESULTS, reporte));
+        }
+        console.error(`🗑️  Borrados ${reportesViejos.length} reportes anteriores`);
+      }
+
+      // ── PASO 2: Correr Cypress ──────────────────────────────────────
       try {
         console.error(`Ejecutando Cypress con spec: ${spec}`);
         execSync(
@@ -59,23 +67,35 @@ export function registrarCypressTools(server: McpServer) {
         );
         console.error("Cypress terminó correctamente ✅");
       } catch (error) {
-        // Cypress lanza error si hay tests fallidos — es normal, continuamos
         console.error("Cypress terminó con fallos (normal, continuamos)");
       }
 
-      // ── PASO 2: Convertir mochawesome → formato del agente ──────────
-      const ORIGEN  = "D:/QA/Front/cypress_front/cypress/results/mochawesome.json";
-      const DESTINO = path.join(process.cwd(), "results", "test-resultado.json");
+      // ── PASO 3: Leer el reporte recién generado ─────────────────────
+      const archivos = fs.readdirSync(CARPETA_RESULTS)
+        .filter(f => f.startsWith("mochawesome") && f.endsWith(".json"))
+        .filter(f => f !== "mochawesome.json");
 
-      if (!fs.existsSync(ORIGEN)) {
+      if (archivos.length === 0) {
         return {
-          content: [{ type: "text", text: "Error: Cypress no generó el archivo mochawesome.json" }]
+          content: [{ type: "text", text: "Error: Cypress no generó ningún reporte mochawesome" }]
         };
       }
 
-      const raw         = fs.readFileSync(ORIGEN, "utf-8");
+      // El más reciente — ahora siempre será el de esta ejecución
+      const masReciente = archivos
+        .map(f => ({
+          nombre: f,
+          fecha: fs.statSync(path.join(CARPETA_RESULTS, f)).mtime
+        }))
+        .sort((a, b) => b.fecha.getTime() - a.fecha.getTime())[0];
+
+      console.error(`📄 Leyendo reporte: ${masReciente.nombre}`);
+
+      const ORIGEN = path.join(CARPETA_RESULTS, masReciente.nombre);
+      const raw    = fs.readFileSync(ORIGEN, "utf-8");
       const mochawesome = JSON.parse(raw);
 
+      // ── PASO 4: Convertir al formato del agente ─────────────────────
       const testsExtraidos: Array<{
         name: string;
         status: string;
@@ -90,7 +110,7 @@ export function registrarCypressTools(server: McpServer) {
               name:     test.title,
               status:   test.state,
               duration: test.duration,
-              error:    test.err?.message ?? null
+              error:    test.err ? test.err.message : null
             });
           }
         }

@@ -26,10 +26,13 @@ qa-agente-v2/
 ├── agentes/               # Directorio de agentes de IA
 │   ├── agente01-LeeAnaliza/
 │   │   └── index.ts      # Agente que analiza resultados de pruebas
-│   └── agente02-Generador/
-│       └── index.ts      # Agente que genera Gherkin desde Historias de Usuario
+│   ├── agente02-GeneradorFeature/
+│   │   └── index.ts      # Agente que genera .feature desde Historias de Usuario
+│   └── agente03-GeneradorSteps/
+│       └── index.ts      # Agente que genera step definitions y Page Objects
 ├── historias/             # Historias de Usuario para procesar
-│   └── historia_usuario.txt # Ejemplo de historia de usuario
+│   ├── historia_usuario.txt # Ejemplo de historia de usuario
+│   └── hu-sprint3.txt      # Historia de usuario Sprint 3 (Carrito de compras)
 ├── results/               # Carpeta para almacenar reportes y borradores
 │   ├── test-resultado.json # Resultados de pruebas convertidos
 │   └── historia_usuario-borrador.txt # Borradores generados
@@ -97,8 +100,8 @@ El servidor (`mcp-server/index.ts`) proporciona herramientas centralizadas para 
   - Genera reportes estructurados con estadísticas y recomendaciones
 - **Ejecución**: `npm run agente01`
 
-#### Agente 02 - Generador (`agentes/agente02-Generador/index.ts`)
-- **Propósito**: Convertir Historias de Usuario a escenarios Gherkin para Cypress
+#### Agente 02 - Generador de Features (`agentes/agente02-GeneradorFeature/index.ts`)
+- **Propósito**: Convertir Historias de Usuario a archivos .feature para Cypress
 - **Funcionalidad**:
   - Lee Historias de Usuario desde la carpeta `historias/`
   - Genera escenarios Gherkin en español siguiendo mejores prácticas
@@ -106,6 +109,15 @@ El servidor (`mcp-server/index.ts`) proporciona herramientas centralizadas para 
 - **Ejecución**:
   - Generar borrador: `npm run agente02:borrador historia_usuario.txt`
   - Confirmar y mover: `npm run agente02:confirmar login-borrador.txt Sprint1 login.feature`
+
+#### Agente 03 - Generador de Steps (`agentes/agente03-GeneradorSteps/index.ts`)
+- **Propósito**: Generar step definitions y actualizar Page Objects automáticamente
+- **Funcionalidad**:
+  - Lee archivos .feature existentes en el proyecto Cypress
+  - Analiza Page Objects (Elementos y Funciones) existentes
+  - Genera step definitions en TypeScript
+  - Actualiza Page Objects con nuevos selectores y métodos faltantes
+- **Ejecución**: `npm run agente03 -- Sprint1/login.feature Login Sprint1/login.ts`
 
 ### Conversor de Cypress (`convertir-cypress.mjs`)
 
@@ -169,43 +181,258 @@ npm run agente01
 
 - `npm run server` - Inicia el servidor MCP
 - `npm run agente01` - Ejecuta el agente analista de resultados
-- `npm run agente02:borrador [archivo]` - Genera borrador Gherkin desde Historia de Usuario
+- `npm run agente02:borrador [archivo]` - Genera borrador .feature desde Historia de Usuario
 - `npm run agente02:confirmar [borrador] [sprint] [feature]` - Confirma y mueve archivo .feature
+- `npm run agente03 -- [feature] [pageObject] [output]` - Genera step definitions desde .feature
 
-## Ejemplo de Uso Completo
+## Ejemplos Detallados de Uso
 
+### 🚀 Ejemplo 1: Flujo Completo - Historia de Usuario → Pruebas Funcionales
+
+**Paso 1: Crear/Actualizar una Historia de Usuario**
 ```bash
-# 1. Configurar el proyecto
-echo "ANTHROPIC_API_KEY=sk-ant-api03-..." > .env
-npm install
+# Editar el archivo de historia
+# historias/hu-sprint3.txt
+```
 
-# 2. Generar escenarios desde una historia de usuario
-npm run agente02:borrador historia_usuario.txt
+**Paso 2: Generar Feature File desde la Historia**
+```bash
+# Generar borrador del feature
+npm run agente02:borrador hu-sprint3.txt
 
-# 3. Revisar el borrador generado
-cat results/historia_usuario-borrador.txt
+# El agente creará: results/hu-sprint3-borrador.txt
+```
 
-# 4. Aprobar y mover al proyecto Cypress
-npm run agente02:confirmar historia_usuario-borrador.txt Sprint1 login.feature
+**Paso 3: Revisar y Confirmar el Feature**
+```bash
+# Revisar el borrador generado
+cat results/hu-sprint3-borrador.txt
 
-# 5. Si tienes resultados de Cypress, convertirlos
+# Si está correcto, confirmar y mover al proyecto Cypress
+npm run agente02:confirmar hu-sprint3-borrador.txt Sprint3 carrito-compras.feature
+```
+
+**Paso 4: Generar Step Definitions y Page Objects**
+```bash
+# Generar steps y actualizar Page Objects automáticamente
+npm run agente03 -- Sprint3/carrito-compras.feature Carrito Sprint3/carrito-compras.ts
+```
+
+**Paso 5: Ejecutar las Pruebas**
+```bash
+# (En el proyecto Cypress) Ejecutar el nuevo feature
+npx cypress run --spec "cypress/e2e/features/Sprint3/carrito-compras.feature"
+```
+
+**Paso 6: Analizar Resultados**
+```bash
+# Convertir resultados de Mochawesome
 node convertir-cypress.mjs
 
-# 6. Analizar los resultados
+# Analizar con el Agente 01
 npm run agente01
+```
+
+### 🔍 Ejemplo 2: Análisis de Resultados de Pruebas Existentes
+
+**Paso 1: Convertir Resultados de Cypress**
+```bash
+# Asegúrate que el archivo exista: D:/QA/Front/cypress_front/cypress/results/mochawesome.json
+node convertir-cypress.mjs
+
+# Output: ✅ Conversión exitosa!
+#    Tests encontrados: 15
+#    Pasaron: 12
+#    Fallaron: 3
+#    Guardado en: ./results/test-resultado.json
+```
+
+**Paso 2: Analizar con IA**
+```bash
+npm run agente01
+
+# El agente:
+# 1. Lee results/test-resultado.json
+# 2. Analiza patrones de fallas
+# 3. Identifica tests flaky
+# 4. Genera recomendaciones
+# 5. Crea un reporte detallado
+```
+
+### 🎯 Ejemplo 3: Actualizar Page Objects Automáticamente
+
+**Escenario**: Tienes un .feature existente pero necesitas actualizar los Page Objects
+
+```bash
+# El agente 3 analizará:
+# 1. El archivo .feature para identificar todos los steps
+# 2. Los Page Objects existentes (Elementos.js y Funciones.js)
+# 3. Detectará qué selectores y métodos faltan
+# 4. Actualizará automáticamente los Page Objects
+# 5. Generará el step definition completo
+
+npm run agente03 -- Sprint1/login.feature Login Sprint1/login.ts
+
+# Output esperado:
+# 📂 Feature:     Sprint1/login.feature
+# 📂 Page Object: Login/LoginElementos.js
+# 📂 Page Object: Login/LoginFunciones.js
+# 📂 Output:      Sprint1/login.ts
+
+# ✅ Selectores agregados a Login/LoginElementos.js: btnLogin, inputPassword
+# ✅ Métodos agregados a Login/LoginFunciones.js: ingresarCredenciales, clickLogin
+# ✅ Steps guardados en: D:/QA/Front/cypress_front/cypress/e2e/stepDefinitions/Sprint1/login.ts
+```
+
+### 📝 Ejemplo 4: Procesar Múltiples Historias de Usuario
+
+```bash
+# Procesar múltiples historias en secuencia
+for historia in historias/*.txt; do
+  nombre=$(basename "$historia" .txt)
+  
+  echo "Procesando: $nombre"
+  
+  # Generar borrador
+  npm run agente02:borrador "$nombre.txt"
+  
+  # Confirmar automáticamente (si confías en la calidad)
+  npm run agente02:confirmar "$nombre-borrador.txt" "Sprint$(date +%Y%m%d)" "$nombre.feature"
+  
+  # Generar steps
+  npm run agente03 -- "Sprint$(date +%Y%m%d)/$nombre.feature" "$(echo $nombre | cut -d'-' -f1)" "Sprint$(date +%Y%m%d)/$nombre.ts"
+done
+```
+
+### 🛠️ Ejemplo 5: Debug y Troubleshooting
+
+**Verificar que todo esté configurado correctamente:**
+```bash
+# 1. Verificar variables de entorno
+cat .env
+
+# 2. Verificar que el servidor MCP funcione
+npm run server
+
+# 3. Probar con una historia simple
+echo "Historia simple de prueba" > historias/test.txt
+npm run agente02:borrador test.txt
+```
+
+**Si algo falla, verificar:**
+```bash
+# Estructura de archivos
+tree agentes/ historias/ results/
+
+# Permisos en el proyecto Cypress
+ls -la "D:/QA/Front/cypress_front/cypress/e2e/"
+
+# Logs de errores
+npm run agente01 2>&1 | tee debug.log
+```
+
+## Diagrama de Flujo del Sistema
+
+```mermaid
+graph TD
+    A[Historia de Usuario] --> B[Agente 02: Generador Feature]
+    B --> C[Borrador .feature]
+    C --> D[Revisión Humana]
+    D --> E[Feature en Cypress]
+    E --> F[Agente 03: Generador Steps]
+    F --> G[Page Objects Actualizados]
+    G --> H[Step Definitions]
+    H --> I[Ejecución Cypress]
+    I --> J[Mochawesome JSON]
+    J --> K[Conversor Cypress]
+    K --> L[test-resultado.json]
+    L --> M[Agente 01: Analiza]
+    M --> N[Reporte Final]
+    
+    O[Servidor MCP] --> B
+    O --> F
+    O --> M
+    
+    style A fill:#e1f5fe
+    style N fill:#f3e5f5
+    style O fill:#fff3e0
+```
+
+## Flujo de Trabajo por Agente
+
+### 📝 Agente 02: Generador de Features
+**Input**: Historia de Usuario (`.txt`) → **Output**: Feature File (`.feature`)
+
+```mermaid
+graph LR
+    A[historias/hu-sprint3.txt] --> B[leer_historia_usuario]
+    B --> C[Claude AI analiza]
+    C --> D[genera Gherkin]
+    D --> E[guardar_borrador_gherkin]
+    E --> F[results/hu-sprint3-borrador.txt]
+    F --> G[Revisión QA]
+    G --> H[guardar_feature_en_cypress]
+    H --> I[cypress/e2e/features/Sprint3/carrito-compras.feature]
+```
+
+### 🔧 Agente 03: Generador de Steps
+**Input**: Feature File (`.feature`) → **Output**: Step Definitions (`.ts`) + Page Objects
+
+```mermaid
+graph LR
+    A[Sprint3/carrito-compras.feature] --> B[leer_feature]
+    B --> C[leer_page_object Elementos]
+    C --> D[leer_page_object Funciones]
+    D --> E[Análisis de faltantes]
+    E --> F[actualizar_page_object_elementos]
+    F --> G[actualizar_page_object_funciones]
+    G --> H[Generar step definitions]
+    H --> I[guardar_steps]
+    I --> J[Sprint3/carrito-compras.ts]
+```
+
+### 📊 Agente 01: Analizador de Resultados
+**Input**: Test Results (`.json`) → **Output**: Reporte Analítico
+
+```mermaid
+graph LR
+    A[test-resultado.json] --> B[leer_resultado_del_test]
+    B --> C[Claude AI analiza]
+    C --> D[Identifica patrones]
+    D --> E[Genera insights]
+    E --> F[Guarda reporte]
+    F --> G[Reporte final]
 ```
 
 ## Formatos de Archivos
 
-### Historia de Usuario (`historias/historia_usuario.txt`)
-Formato estructurado con:
-- Título y descripción
-- Objetivo de negocio
-- Actor
-- Descripción funcional
-- Reglas de negocio
-- Criterios de aceptación
-- Casos de prueba detallados
+### Historia de Usuario (`historias/hu-sprint3.txt`)
+Ejemplo del formato estructurado para el Sprint 3:
+
+```txt
+HISTORIA DE USUARIO — Sprint 3
+Funcionalidad: Gestión del Carrito de Compras
+Aplicación: SauceDemo (https://www.saucedemo.com)
+Credenciales: usuario: standard_user / password: secret_sauce
+
+─────────────────────────────────────────────────
+COMO usuario autenticado en SauceDemo
+QUIERO poder agregar y quitar productos del carrito
+PARA gestionar mis compras antes de finalizar el pedido
+─────────────────────────────────────────────────
+
+CRITERIOS DE ACEPTACIÓN:
+
+1. AGREGAR PRODUCTO AL CARRITO
+   - Dado que el usuario está en la página de productos
+   - Cuando hace clic en "Add to cart" de un producto
+   - Entonces el ícono del carrito muestra 1 producto
+
+2. AGREGAR MÚLTIPLES PRODUCTOS
+   - Dado que el usuario está en la página de productos
+   - Cuando agrega 2 productos distintos al carrito
+   - Entonces el ícono del carrito muestra 2 productos
+```
 
 ### Resultados de Pruebas (`results/test-resultado.json`)
 ```json
@@ -238,6 +465,44 @@ Feature: Inicio de sesión de usuario
     And debería ver mi nombre de usuario en la interfaz
 ```
 
+## Herramientas MCP Disponibles
+
+### Para Agente 02 (Generador de Features)
+- **leer_historia_usuario**: Lee archivos .txt de historias de usuario
+- **guardar_borrador_gherkin**: Guarda borradores en `/results` para revisión
+- **guardar_feature_en_cypress**: Mueve features aprobados al proyecto Cypress
+
+### Para Agente 03 (Generador de Steps)
+- **leer_feature**: Lee archivos .feature del proyecto Cypress
+- **leer_page_object**: Lee Page Objects (Elementos.js y Funciones.js)
+- **actualizar_page_object_elementos**: Agrega nuevos selectores XPath
+- **actualizar_page_object_funciones**: Agrega nuevos métodos a Page Objects
+- **guardar_steps**: Guarda step definitions en TypeScript
+
+### Para Agente 01 (Analizador)
+- **listar_reportes**: Lista todos los reportes en `/results`
+- **leer_resultado_del_test**: Lee resultados de pruebas en formato JSON
+- **guardar_reporte**: Guarda reportes analizados
+
+## Comandos Rápidos de Referencia
+
+```bash
+# 🚀 Flujo completo (desde cero)
+npm run agente02:borrador hu-sprint3.txt && \
+npm run agente02:confirmar hu-sprint3-borrador.txt Sprint3 carrito-compras.feature && \
+npm run agente03 -- Sprint3/carrito-compras.feature Carrito Sprint3/carrito-compras.ts
+
+# 📊 Análisis de resultados
+node convertir-cypress.mjs && npm run agente01
+
+# 🔄 Procesamiento batch
+for f in historias/*.txt; do npm run agente02:borrador $(basename $f); done
+
+# 🛠️ Debug
+npm run server  # Terminal 1
+npm run agente02:borrador historia_usuario.txt  # Terminal 2
+```
+
 ## Dependencias Principales
 
 - `@modelcontextprotocol/sdk`: SDK para implementar servidores MCP
@@ -247,115 +512,6 @@ Feature: Inicio de sesión de usuario
 - `typescript`: Compilador de TypeScript
 - `ts-node`: Ejecución directa de archivos TypeScript
 
-## Arquitectura y Flujo de Datos
-
-```mermaid
-graph TD
-    A[Historia de Usuario] --> B[Agente 02 - Generador]
-    B --> C[Borrador Gherkin]
-    C --> D[Revisión Humana]
-    D --> E[Archivo .feature en Cypress]
-    E --> F[Ejecución de Cypress]
-    F --> G[Mochawesome JSON]
-    G --> H[Conversor Cypress]
-    H --> I[test-resultado.json]
-    I --> J[Agente 01 - Analiza]
-    J --> K[Reporte Final]
-    
-    L[Servidor MCP] --> B
-    L --> J
-    L --> H
-```
-
-## Características Técnicas
-
-### Protocolo MCP (Model Context Protocol)
-- **Comunicación**: Todos los agentes se comunican a través del protocolo MCP
-- **Tools Centralizadas**: El servidor MCP expone herramientas reutilizables
-- **Transporte Stdio**: Comunicación eficiente entre procesos
-
-### Integración con IA
-- **Claude AI**: Utiliza modelos de Anthropic para análisis y generación
-- **Procesamiento Natural**: Comprensión de historias de usuario en lenguaje natural
-- **Generación de Código**: Creación automática de escenarios Gherkin
-
-### Integración con Ecosistema de Pruebas
-- **Cypress**: Integración con framework de pruebas E2E
-- **Mochawesome**: Formato estándar de reportes de pruebas
-- **Gherkin**: Lenguaje BDD para escenarios de prueba
-
-## Mejores Prácticas
-
-### Para Historias de Usuario
-- Ser específicas y medibles
-- Incluir criterios de aceptación claros
-- Definir casos de prueba edge cases
-- Especificar resultados esperados
-
-### Para Escenarios Gherkin
-- Usar lenguaje español y claro
-- Mantener escenarios cortos y enfocados
-- Incluir tags descriptivos
-- Seguir patrón Given-When-Then
-
-### Para Análisis de Resultados
-- Revisar patrones de fallas
-- Identificar flaky tests
-- Analizar tiempos de ejecución
-- Generar recomendaciones accionables
-
-## Troubleshooting
-
-### Problemas Comunes
-
-#### Error: ANTHROPIC_API_KEY no configurada
-```bash
-# Solución: Agregar tu API key al archivo .env
-echo "ANTHROPIC_API_KEY=sk-ant-api03-..." > .env
-```
-
-#### Error: No se encuentra el archivo de historia
-```bash
-# Verificar que el archivo exista en historias/
-ls historias/
-```
-
-#### Error: El servidor MCP no responde
-```bash
-# Asegurarse que el servidor esté corriendo en otra terminal
-npm run server
-```
-
-## Roadmap y Mejoras Futuras
-
-### Características Planeadas
-- [ ] **Dashboard Web**: Interfaz visual para monitoreo de resultados
-- [ ] **Más Agentes**: Agente especializado en performance testing
-- [ ] **Integraciones**: Soporte para otros frameworks (Playwright, Jest)
-- [ ] **Reportes Avanzados**: Generación de PDFs y dashboards
-- [ ] **CI/CD Integration**: Hooks para pipelines automatizados
-
-### Mejoras Técnicas
-- [ ] **Caché de Resultados**: Optimización de análisis repetidos
-- [ ] **Paralelización**: Ejecución concurrente de agentes
-- [ ] **Persistencia**: Base de datos para historial de reportes
-- [ ] **API REST**: Endpoints para integración externa
-
-## Contribución
-
-Este es un proyecto educativo para aprender sobre agentes de IA y automatización de pruebas de calidad.
-
-### Cómo Contribuir
-1. Fork del proyecto
-2. Crear una rama para tu feature: `git checkout -b feature/nueva-funcionalidad`
-3. Commit de tus cambios: `git commit -am 'Agrega nueva funcionalidad'`
-4. Push a la rama: `git push origin feature/nueva-funcionalidad`
-5. Crear un Pull Request
-
-### Licencia
-
-Este proyecto está bajo licencia ISC.
-
 ---
 
-**Nota**: Este proyecto es parte de un experimento educativo sobre el uso de agentes de IA en procesos de QA automatizado.
+**✨ README actualizado con todos los agentes y ejemplos detallados de uso!**

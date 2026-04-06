@@ -9,7 +9,8 @@
     "agente01": "tsx agentes/agente01-LeeAnaliza/index.ts",
     "agente02:borrador": "tsx agentes/agente02-GeneradorFeature/index.ts borrador",
     "agente02:confirmar": "tsx agentes/agente02-GeneradorFeature/index.ts confirmar",
-    "agente03": "tsx agentes/agente03-GeneradorSteps/index.ts"
+    "agente03:steps": "tsx agentes/agente03-GeneradorSteps/index.ts",
+    "agente04:corrector": "tsx agentes/agente04-AutoCorrector/index.ts"
   },
   "keywords": [],
   "author": "",
