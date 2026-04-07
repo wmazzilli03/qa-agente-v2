@@ -1,0 +1,46 @@
+Feature: Autenticación en SauceDemo
+
+  @login_exitoso
+  Scenario: Login exitoso con credenciales válidas
+    Given el usuario está en la página de login de SauceDemo
+    When el usuario ingresa el usuario "standard_user" y la contraseña "secret_sauce"
+    And hace clic en el botón "Login"
+    Then el usuario es redirigido a la página de inventario
+
+  @login_fallido_usuario_incorrecto
+  Scenario: Login fallido con usuario incorrecto
+    Given el usuario está en la página de login de SauceDemo
+    When el usuario ingresa el usuario "usuario_incorrecto" y la contraseña "secret_sauce"
+    And hace clic en el botón "Login"
+    Then se muestra un mensaje de error que indica que el usuario es incorrecto
+
+  @login_fallido_contraseña_incorrecta
+  Scenario: Login fallido con contraseña incorrecta
+    Given el usuario está en la página de login de SauceDemo
+    When el usuario ingresa el usuario "standard_user" y la contraseña "contraseña_incorrecta"
+    And hace clic en el botón "Login"
+    Then se muestra un mensaje de error que indica que la contraseña es incorrecta
+
+  @login_fallido_campos_vacios
+  Scenario: Login fallido con campos vacíos
+    Given el usuario está en la página de login de SauceDemo
+    When el usuario deja los campos de usuario y contraseña en blanco
+    And hace clic en el botón "Login"
+    Then se muestra un mensaje de error que indica que los campos son obligatorios
+
+  @acceso_bloqueado
+  Scenario: Acceso bloqueado para usuario bloqueado
+    Given el usuario está en la página de login de SauceDemo
+    When el usuario ingresa el usuario "locked_out_user" y la contraseña "secret_sauce"
+    And hace clic en el botón "Login"
+    Then se muestra un mensaje de error indicando que el usuario está bloqueado
+
+  @verificar_boton_login
+  Scenario: Verificar la presencia del botón "Login"
+    Given el usuario está en la página de login de SauceDemo
+    Then el botón "Login" debe ser visible en la página
+
+  @verificar_titulo_login
+  Scenario: Verificar el título de la página de login
+    Given el usuario está en la página de login de SauceDemo
+    Then el título de la página debe ser "Swag Labs"
